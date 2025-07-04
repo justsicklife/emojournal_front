@@ -1,25 +1,26 @@
 import { useEffect, useState } from "react";
+import api from "../api/axiosInstance";
+import axios from "axios";
 
 const Home = () => {
 
   const [member,setMember] = useState({});
 
+  const getMemberInfo = async () => {
+    console.log("aaa");
+    try {
+      const res = await api.get("/member")
+      console.log("회원 정보: ", res.data);
+      setMember(res.data);
+    } catch(err) {
+      console.error("요청  실패 : " , err);
+    }
+  }
+
+
+
   useEffect(() => {
-
-    const accessToken = localStorage.getItem("accessToken");
-
-    fetch("http://localhost:8080/member",{
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + accessToken
-      },
-      credentials: "include"
-    })
-    .then((res) => res.json())
-    .then((data) => {
-      setMember(data);
-    })
+    getMemberInfo()
   },[]);
 
   return (
