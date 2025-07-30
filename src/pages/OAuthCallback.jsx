@@ -67,10 +67,7 @@ const OAuthCallback = () => {
             // 클라는 authorizationCode 여서 불일치
             // 그래서 임시로 일단은 json 값에 필드를 code 로 바꿔놓음 
             // authorizationCode: code,
-          code: code,
-          redirectUri: redirectUri,
-          clientId: clientId,
-          state: 'login' // CSRF 방지를 위한 state
+          code
         })
       });
 

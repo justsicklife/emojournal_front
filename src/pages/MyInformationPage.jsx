@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import api from '../api/axiosInstance';
 
 const Container = styled.div`
   display: flex;
@@ -150,27 +151,88 @@ const EditButton = styled.button`
   &:active {
     transform: translateY(1px);
   }
+
+   &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f5f5f5;
+    border-color: #ddd;
+  }
 `;
 
 const MyInformationPage = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const [member, setMember] = useState(null);
+  const [nickname, setNickname] = useState('');
+  const [gender, setGender] = useState('');
+  const [mbti, setMbti] = useState('');
+
+  const isMemberChange = () => {
+    if(member.nickname !== nickname || 
+      member.gender !== gender ||
+      member.mbti !== mbti
+    ) {
+      if(gender !== "" && mbti !== "" && nickname !== "") {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  const getMemberInfo = async () => {
+    try {
+      if(localStorage.getItem("accessToken")) {
+        const res = await api.get("/member")
+        console.log("회원 정보: ", res.data);
+
+        const cleanedData = { ...res.data };
+
+        for (let key in cleanedData) {
+          if (cleanedData[key] === null) {
+            cleanedData[key] = "";
+          }
+        }
+
+
+        console.log(cleanedData)
+        setMember(cleanedData);
+
+        setNickname(res.data.nickname)
+      }
+    } catch(err) {
+      console.error("요청  실패 : " , err);
+    }
+  }
 
   useEffect(() => {
-    // 로컬스토리지에서 user 정보 가져오기
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    // 로컬스토리지에서 member 정보 가져오기
+    getMemberInfo()
   }, []);
 
-  const handleEditClick = () => {
+  const handleEditClick = async () => {
     console.log('수정 버튼 클릭됨');
     // 예) 수정 페이지로 이동
     // navigate('/edit-profile');
+    
+    // 그냥 페이지로 이동 하지 말고 
+    // 유저정보 페이지에서 수정 하는 걸로?
+
+    if(isMemberChange()) {
+      // const res = await api.patch("/member",
+      //   {
+      //     nickname,
+      //     gender,
+      //     mbti
+      //   }
+      // )
+      // console.log(res.data)
+
+    }
+  
   };
 
-  if (!user) {
+  if (!member) {
     return (
       <Container>
         <p>사용자 정보를 불러오는 중입니다... 또는 로그인이 필요합니다.</p>
@@ -188,43 +250,77 @@ const MyInformationPage = () => {
           <ProfileHeader>
             <ProfileAvatar>
               <AvatarCircle>
-                {user.picture ? (
-                  <AvatarImage src={user.picture} alt="프로필 사진" />
+                {member.picture ? (
+                  <AvatarImage src={member.picture} alt="프로필 사진" />
                 ) : (
                   <AvatarEmoji>🙂</AvatarEmoji>
                 )}
               </AvatarCircle>
             </ProfileAvatar>
-            <Greeting>안녕하세요 {user.name}님</Greeting>
+            <Greeting>안녕하세요 {member.nickname}님</Greeting>
           </ProfileHeader>
 
           <ProfileInfo>
-            <InfoItem>
+
+          <InfoItem>
+            <InfoText>
+              이메일 : {member.email}
+            </InfoText>
+          </InfoItem>
+
+          <InfoItem>
+          
+            <InfoText>
+              닉네임 : 
+              <input
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                style={{ fontSize: "24px", marginLeft: "10px" }}
+              />
+            </InfoText>
+            
+          </InfoItem>
+
+          <InfoItem>
               <InfoText>
-                이름 : {user.name} {user.nickname ? `[닉네임 : ${user.nickname}]` : ''}
+                성별 : 
+                <select value={gender} onChange={(e) => setGender(e.target.value)} style={{ fontSize: "24px", marginLeft: "10px" }}>
+                  <option value="">선택</option>
+                  <option value="MALE">남성</option>
+                  <option value="FEMALE">여성</option>
+                </select>
               </InfoText>
-            </InfoItem>
-            <InfoItem>
+            
+          </InfoItem>
+
+          <InfoItem>
               <InfoText>
-                이메일 : {user.email}
+                MBTI :
+                <select value={mbti} onChange={(e) => setMbti(e.target.value)} style={{ fontSize: "24px", marginLeft: "10px" }}>
+                  <option>선택</option>
+                  {["INTJ", "INTP", "ENTJ", "ENTP", "INFJ", "INFP", "ENFJ", "ENFP",
+                    "ISTJ", "ISFJ", "ESTJ", "ESFJ", "ISTP", "ISFP", "ESTP", "ESFP"]
+                    .map(type => (
+                      <option key={type} value={type}>{type}</option>
+                    ))}
+                </select>
               </InfoText>
-            </InfoItem>
-            <InfoItem>
-              <InfoText>
-                성별 : {user.gneder} MBTI : {user.mbti}
-              </InfoText>
-            </InfoItem>
-            <InfoItem>
-              <InfoText>
-                가입한 날 : {user.joinDate}
-              </InfoText>
-            </InfoItem>
-            {/* 필요하면 다른 정보도 추가 */}
-            {/* 예: 생년월일, 성별 등은 구글 JWT 토큰에 없으면 백엔드에서 추가 제공 필요 */}
+            
+          </InfoItem>
+
+          <InfoItem>
+            <InfoText>
+              가입한 날 : {member.createDate?.split('T')[0]}
+            </InfoText>
+          </InfoItem>
           </ProfileInfo>
 
           <ProfileFooter>
-            <EditButton onClick={handleEditClick}>수정</EditButton>
+            <EditButton 
+            disabled={!isMemberChange()}
+            onClick={handleEditClick}>
+              수정  
+            </EditButton>
           </ProfileFooter>
         </ProfileCard>
       </Container>
