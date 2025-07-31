@@ -197,8 +197,9 @@ const MyInformationPage = () => {
 
         console.log(cleanedData)
         setMember(cleanedData);
-
-        setNickname(res.data.nickname)
+        setGender(cleanedData.gender)
+        setNickname(cleanedData.nickname)
+        setMbti(cleanedData.mbti)
       }
     } catch(err) {
       console.error("요청  실패 : " , err);
@@ -219,14 +220,15 @@ const MyInformationPage = () => {
     // 유저정보 페이지에서 수정 하는 걸로?
 
     if(isMemberChange()) {
-      // const res = await api.patch("/member",
-      //   {
-      //     nickname,
-      //     gender,
-      //     mbti
-      //   }
-      // )
-      // console.log(res.data)
+      const res = await api.put("/member",
+        {
+          nickname,
+          gender,
+          mbti
+        }
+      )
+
+      window.location.href = "/MyInformationPage"
 
     }
   
