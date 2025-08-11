@@ -149,8 +149,13 @@ const LoginPage = () => {
     
     try {
       // Google OAuth 2.0 Authorization URL 생성
-      const url = `https://accounts.google.com/o/oauth2/v2/auth?response_type=${responseType}&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}&prompt=consent&access_type=offline`;
+      // 처음 로그인 한 유저는 구글 토큰을 주지만 
+      // 이미 로그인 전적이 있는 유저는 안준다
+      const url = `https://accounts.google.com/o/oauth2/v2/auth?response_type=${responseType}&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}`;
       
+      // 이 url 을 쓰면 google token 을 무조건 준다
+      // const url = `https://accounts.google.com/o/oauth2/v2/auth?response_type=${responseType}&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}&prompt=consent&access_type=offline`;
+
       console.log('Google OAuth URL로 이동:', url);
       
       // Google 로그인 페이지로 리다이렉트

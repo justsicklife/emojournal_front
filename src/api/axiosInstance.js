@@ -1,5 +1,7 @@
 import axios from "axios";
 
+let isRefreshing = false;
+
 const api = axios.create({
     baseURL: "http://localhost:8090",
     withCredentials: true
@@ -17,22 +19,24 @@ api.interceptors.request.use((config) =>  {
 })
 
 // 응답 전 새 access 토큰 받으면 갈아 끼기
+// 응답 실패가 발생했을때 이 로직을 실행하는 것
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
         
-        let accessToken = localStorage.getItem("accessToken");
-
         const originalRequest = error.config;
 
-        // 응답이 401 이거나 이미 재시도 한 요청이 아니면 
-        if(error.response?.status === 401 && !originalRequest._retry) {
-            originalRequest._retry = true;
+        console.log(error.response?.status === 401 && !isRefreshing)
 
+        // 응답이 401 이거나 이미 재시도 한 요청이 아니면 
+        if(error.response?.status === 401 && !isRefreshing) {
+            isRefreshing = true;
+            
             try {
+                console.log("재발급 요청 전") 
                 // access token 재발급 요청
                 const res = await api.post("/auth/reissue");
-                
+                console.log("재발급")
                 // 서버에서 보내준 토큰 가져오기
                 const newToken = res.data.accessToken;
                 
@@ -46,6 +50,7 @@ api.interceptors.response.use(
                 return api(originalRequest)
             } catch(reissueError) {
                 console.error("재발급 실패", reissueError);
+                window.location.href = "/LoginPageOauth"
                 return Promise.reject(reissueError);
             }
         }

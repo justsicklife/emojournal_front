@@ -14,6 +14,7 @@ import MyInformationPageTest from './pages/MyInformationPageTest';
 import MyInformationPage from './pages/MyInformationPage';
 import MovePage from './pages/MovePage';
 import OAuthCallback from './pages/OAuthCallback';
+import Calendar from './pages/Calendar';
 
 
 const App = () => {
@@ -33,7 +34,7 @@ const App = () => {
 
           {/* 소셜로그인후 콜백 페이지 */}
           <Route path="/oauth/callback" element={<OAuthCallback />} />
-
+          <Route path='/calendar' element={<Calendar/>}/>
         </Routes>
       </div>
       <Footer/>

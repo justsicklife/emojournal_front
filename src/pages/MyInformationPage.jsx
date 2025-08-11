@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import api from '../api/axiosInstance';
+import axios from 'axios';
 
 const Container = styled.div`
   display: flex;
@@ -180,6 +181,18 @@ const MyInformationPage = () => {
     return false
   }
 
+  const logoutButton = () => {
+      api.post("/auth/logout",null , {
+        withCredentials: true,
+      }).then((response) => {
+        localStorage.removeItem("accessToken");
+        console.log("로그아웃 완료")
+        window.location.href = "/LoginPageOauth"
+      }).catch((error) => {
+        console.error("로그아웃 실패")
+      })      
+  } 
+
   const getMemberInfo = async () => {
     try {
       if(localStorage.getItem("accessToken")) {
@@ -249,6 +262,9 @@ const MyInformationPage = () => {
 
       <Container>
         <ProfileCard>
+        <div>
+        <button onClick={logoutButton}>로그아웃</button>
+      </div>
           <ProfileHeader>
             <ProfileAvatar>
               <AvatarCircle>
